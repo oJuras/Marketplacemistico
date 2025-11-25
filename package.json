@@ -2,12 +2,13 @@
   "name": "marketplace-mistico",
   "version": "1.0.0",
   "type": "module",
-  "description": "Marketplace místico com Neon + Vercel",
+  "main": "api/db.js",
   "scripts": {
     "dev": "vercel dev"
   },
   "dependencies": {
     "@neondatabase/serverless": "^0.9.0",
+    "@vercel/node": "^3.0.0",
     "bcryptjs": "^2.4.3",
     "jsonwebtoken": "^9.0.2"
   },
