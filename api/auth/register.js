@@ -2,7 +2,6 @@ import { query } from '../db.js';
 import bcryptjs from 'bcryptjs';
 
 export default async function handler(req, res) {
-  // CORS headers
   res.setHeader('Access-Control-Allow-Credentials', 'true');
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT');
@@ -22,7 +21,6 @@ export default async function handler(req, res) {
   try {
     const { tipo, nome, email, senha, telefone, cpf_cnpj, nomeLoja, categoria, descricaoLoja } = req.body;
 
-    // Validações
     if (!tipo || !nome || !email || !senha) {
       console.log('❌ Campos obrigatórios faltando');
       return res.status(400).json({ error: 'Campos obrigatórios faltando' });
@@ -30,7 +28,6 @@ export default async function handler(req, res) {
 
     console.log('✅ Validação inicial OK');
 
-    // Verificar se email já existe
     console.log('🔍 Verificando se email existe...');
     const existingUser = await query('SELECT id FROM users WHERE email = $1', [email]);
     
@@ -41,19 +38,16 @@ export default async function handler(req, res) {
 
     console.log('✅ Email disponível');
 
-    // Hash da senha
     console.log('🔐 Gerando hash da senha...');
     const senhaHash = await bcryptjs.hash(senha, 10);
     console.log('✅ Hash gerado');
 
-    // Determinar tipo de documento
     let tipoDocumento = null;
     if (cpf_cnpj) {
       const numbers = cpf_cnpj.replace(/\D/g, '');
       tipoDocumento = numbers.length === 11 ? 'CPF' : 'CNPJ';
     }
 
-    // Inserir usuário
     console.log('💾 Inserindo usuário no banco...');
     const userResult = await query(
       `INSERT INTO users (tipo, nome, email, senha_hash, telefone, cpf_cnpj, tipo_documento)
@@ -62,10 +56,9 @@ export default async function handler(req, res) {
       [tipo, nome, email, senhaHash, telefone, cpf_cnpj, tipoDocumento]
     );
 
-    console.log('✅ Usuário inserido:', userResult[0]);
-    const user = userResult[0];
+    console.log('✅ Usuário inserido:', userResult);
+    const user = userResult;
 
-    // Se for vendedor, criar registro de seller
     if (tipo === 'vendedor') {
       console.log('🏪 Criando registro de vendedor...');
       const sellerResult = await query(
@@ -74,8 +67,8 @@ export default async function handler(req, res) {
          RETURNING id`,
         [user.id, nomeLoja, categoria, descricaoLoja]
       );
-      console.log('✅ Vendedor criado:', sellerResult[0]);
-      user.seller_id = sellerResult[0].id;
+      console.log('✅ Vendedor criado:', sellerResult);
+      user.seller_id = sellerResult.id;
       user.nomeLoja = nomeLoja;
     }
 

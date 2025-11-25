@@ -25,7 +25,6 @@ export default async function handler(req, res) {
       return res.status(400).json({ error: 'Email e senha são obrigatórios' });
     }
 
-    // Buscar usuário
     console.log('🔍 Buscando usuário:', email);
     const users = await query(
       `SELECT u.*, s.id as seller_id, s.nome_loja, s.categoria, s.descricao_loja
@@ -40,10 +39,9 @@ export default async function handler(req, res) {
       return res.status(401).json({ error: 'Email ou senha incorretos' });
     }
 
-    const user = users[0];
+    const user = users;
     console.log('✅ Usuário encontrado:', user.nome);
 
-    // Verificar senha
     console.log('🔐 Verificando senha...');
     const senhaValida = await bcryptjs.compare(senha, user.senha_hash);
     
@@ -54,14 +52,12 @@ export default async function handler(req, res) {
 
     console.log('✅ Senha válida');
 
-    // Gerar token JWT
     const token = jwt.sign(
       { id: user.id, email: user.email, tipo: user.tipo },
       process.env.JWT_SECRET || 'secret_padrao_mude_isso',
       { expiresIn: '7d' }
     );
 
-    // Buscar endereço se for cliente
     let endereco = null;
     if (user.tipo === 'cliente') {
       const addresses = await query(
@@ -69,7 +65,7 @@ export default async function handler(req, res) {
         [user.id]
       );
       if (addresses.length > 0) {
-        endereco = addresses[0];
+        endereco = addresses;
       }
     }
 

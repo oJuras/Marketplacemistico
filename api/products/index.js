@@ -23,7 +23,6 @@ export default async function handler(req, res) {
     return res.status(200).end();
   }
 
-  // GET - Listar produtos
   if (req.method === 'GET') {
     try {
       const { categoria, seller_id } = req.query;
@@ -61,7 +60,6 @@ export default async function handler(req, res) {
     }
   }
 
-  // POST - Criar produto (apenas vendedores)
   if (req.method === 'POST') {
     try {
       const user = verifyToken(req);
@@ -69,12 +67,11 @@ export default async function handler(req, res) {
         return res.status(403).json({ error: 'Acesso negado' });
       }
 
-      // Buscar seller_id do usuário
       const sellers = await query('SELECT id FROM sellers WHERE user_id = $1', [user.id]);
       if (sellers.length === 0) {
         return res.status(404).json({ error: 'Vendedor não encontrado' });
       }
-      const sellerId = sellers[0].id;
+      const sellerId = sellers.id;
 
       const { nome, categoria, descricao, preco, estoque, imagemUrl, publicado } = req.body;
 
@@ -89,8 +86,8 @@ export default async function handler(req, res) {
         [sellerId, nome, categoria, descricao, preco, estoque || 0, imagemUrl || '', publicado || false]
       );
 
-      console.log('✅ Produto criado:', result[0]);
-      return res.status(201).json({ success: true, product: result[0] });
+      console.log('✅ Produto criado:', result);
+      return res.status(201).json({ success: true, product: result });
 
     } catch (error) {
       console.error('Erro ao criar produto:', error);

@@ -1,4 +1,4 @@
--- Deletar tabelas se existirem (para recomeçar limpo)
+-- Deletar tabelas se existirem
 DROP TABLE IF EXISTS order_items CASCADE;
 DROP TABLE IF EXISTS orders CASCADE;
 DROP TABLE IF EXISTS products CASCADE;
@@ -6,7 +6,7 @@ DROP TABLE IF EXISTS addresses CASCADE;
 DROP TABLE IF EXISTS sellers CASCADE;
 DROP TABLE IF EXISTS users CASCADE;
 
--- Tabela de Usuários (unificada)
+-- Tabela de Usuários
 CREATE TABLE users (
     id SERIAL PRIMARY KEY,
     tipo VARCHAR(20) NOT NULL CHECK (tipo IN ('vendedor', 'cliente')),
@@ -20,7 +20,7 @@ CREATE TABLE users (
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
--- Tabela de Vendedores (dados específicos)
+-- Tabela de Vendedores
 CREATE TABLE sellers (
     id SERIAL PRIMARY KEY,
     user_id INTEGER UNIQUE NOT NULL REFERENCES users(id) ON DELETE CASCADE,
@@ -90,20 +90,3 @@ CREATE INDEX idx_products_publicado ON products(publicado);
 CREATE INDEX idx_orders_comprador ON orders(comprador_id);
 CREATE INDEX idx_orders_vendedor ON orders(vendedor_id);
 CREATE INDEX idx_users_email ON users(email);
-
--- Inserir dados de teste (senha: 12345678 para todos)
-INSERT INTO users (tipo, nome, email, senha_hash, telefone, cpf_cnpj, tipo_documento) VALUES
-('vendedor', 'Ana Mística', 'ana@tarotmistico.com', '$2a$10$rOiVGKqVj6LhCZqVqQ3.6OKX9F5bJYJ8K8F5bJYJ8K8F5bJYJ8K8Fa', '(11) 99999-9999', '12345678000190', 'CNPJ'),
-('vendedor', 'Roberto Herbalista', 'roberto@ervasraizes.com', '$2a$10$rOiVGKqVj6LhCZqVqQ3.6OKX9F5bJYJ8K8F5bJYJ8K8F5bJYJ8K8Fa', '(11) 88888-8888', '12345678900', 'CPF'),
-('cliente', 'Carlos Oliveira', 'carlos@email.com', '$2a$10$rOiVGKqVj6LhCZqVqQ3.6OKX9F5bJYJ8K8F5bJYJ8K8F5bJYJ8K8Fa', '(11) 77777-7777', NULL, NULL);
-
-INSERT INTO sellers (user_id, nome_loja, categoria, descricao_loja) VALUES
-(1, 'Tarot Místico', 'Tarô e Oráculos', 'Especialista em leituras de tarô com mais de 15 anos de experiência.'),
-(2, 'Ervas & Raízes', 'Cristais e Pedras', 'Loja especializada em ervas medicinais, cristais e produtos naturais.');
-
-INSERT INTO products (seller_id, nome, categoria, descricao, preco, estoque, publicado) VALUES
-(1, 'Tiragem de 5 Cartas', 'Tarô e Oráculos', 'A tiragem é utilizada para ajudar em assuntos financeiros', 15.00, 50, true),
-(2, 'Raiz Kumbaya', 'Cristais e Pedras', 'Raiz do sono vem para te auxiliar no stress do dia dia', 25.00, 30, true),
-(1, 'Consulta de Tarô Completa', 'Tarô e Oráculos', 'Consulta completa de tarô com análise detalhada', 80.00, 10, true),
-(2, 'Cristal de Ametista', 'Cristais e Pedras', 'Cristal de ametista natural para meditação', 45.00, 15, true),
-(1, 'Baralho de Tarô Rider-Waite', 'Tarô e Oráculos', 'Baralho clássico Rider-Waite em português', 60.00, 25, true);

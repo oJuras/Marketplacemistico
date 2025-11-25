@@ -28,7 +28,6 @@ export default async function handler(req, res) {
     return res.status(401).json({ error: 'Não autenticado' });
   }
 
-  // GET - Buscar perfil
   if (req.method === 'GET') {
     try {
       const users = await query(
@@ -43,7 +42,7 @@ export default async function handler(req, res) {
         return res.status(404).json({ error: 'Usuário não encontrado' });
       }
 
-      const userData = users[0];
+      const userData = users;
       delete userData.senha_hash;
 
       return res.status(200).json({

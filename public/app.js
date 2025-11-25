@@ -77,17 +77,25 @@ async function loadSellerProducts() {
 
 // ==================== NAVEGAÇÃO ====================
 function navigateHome() {
-    const currentUser = getCurrentUser();
-    if (!currentUser) {
+    console.log('🏠 navigateHome() chamado');
+    console.log('👤 currentUser:', currentUser);
+    
+    const user = getCurrentUser();
+    
+    if (!user) {
+        console.log('➡️ Sem usuário, indo para marketplace');
         showPage('marketplace');
         loadProducts();
-    } else if (currentUser.tipo === 'vendedor') {
+    } else if (user.tipo === 'vendedor') {
+        console.log('➡️ Vendedor, indo para dashboard-vendedor');
         showPage('dashboard-vendedor');
         loadSellerProducts();
-    } else if (currentUser.tipo === 'cliente') {
+    } else if (user.tipo === 'cliente') {
+        console.log('➡️ Cliente, indo para dashboard-cliente');
         showPage('dashboard-cliente');
         loadProducts();
     } else {
+        console.log('➡️ Tipo desconhecido, indo para marketplace');
         showPage('marketplace');
         loadProducts();
     }
@@ -106,7 +114,10 @@ function showPage(pageId) {
     document.querySelectorAll('.page').forEach(page => {
         page.classList.remove('active');
     });
-    document.getElementById(pageId).classList.add('active');
+    const page = document.getElementById(pageId);
+    if (page) {
+        page.classList.add('active');
+    }
     clearMessages();
 }
 
@@ -204,12 +215,15 @@ function validatePasswordMatch() {
 }
 
 function clearMessages() {
-    document.getElementById('registration-messages').innerHTML = '';
-    document.getElementById('login-messages').innerHTML = '';
+    const regContainer = document.getElementById('registration-messages');
+    const logContainer = document.getElementById('login-messages');
+    if (regContainer) regContainer.innerHTML = '';
+    if (logContainer) logContainer.innerHTML = '';
 }
 
 function showMessage(containerId, message, isError = false) {
     const container = document.getElementById(containerId);
+    if (!container) return;
     const className = isError ? 'error-alert' : 'success-message';
     container.innerHTML = `<div class="${className}">${message}</div>`;
 }
@@ -274,19 +288,69 @@ async function login(event) {
     event.preventDefault();
     clearMessages();
 
-    const email = document.getElementById('login-email').value.trim();
-    const senha = document.getElementById('login-senha').value;
+    console.log('=== INÍCIO DO LOGIN ===');
+
+    const emailInput = document.getElementById('login-email');
+    const senhaInput = document.getElementById('login-senha');
+
+    if (!emailInput || !senhaInput) {
+        console.error('❌ Campos do formulário não encontrados!');
+        alert('ERRO: Campos do formulário não encontrados. Verifique o HTML.');
+        return;
+    }
+
+    const email = emailInput.value.trim();
+    const senha = senhaInput.value;
+
+    console.log('📧 Email:', email);
+    console.log('🔑 Senha:', senha ? '***' : 'vazia');
 
     if (!email || !senha) {
+        console.warn('⚠️ Email ou senha vazios');
         showMessage('login-messages', 'Por favor, preencha email e senha', true);
         return;
     }
 
     try {
-        const data = await apiRequest('/auth/login', {
+        console.log('📡 Fazendo requisição para /api/auth/login...');
+        
+        const url = '/api/auth/login';
+        const options = {
             method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
             body: JSON.stringify({ email, senha })
-        });
+        };
+
+        console.log('📤 URL:', url);
+
+        const response = await fetch(url, options);
+
+        console.log('📨 Response status:', response.status);
+        console.log('📨 Response ok:', response.ok);
+
+        const data = await response.json();
+        console.log('📦 Response data:', data);
+
+        if (!response.ok) {
+            console.error('❌ Erro na resposta:', data.error);
+            throw new Error(data.error || 'Erro ao fazer login');
+        }
+
+        if (!data.success) {
+            console.error('❌ Login falhou:', data);
+            throw new Error(data.error || 'Login falhou');
+        }
+
+        if (!data.token) {
+            console.error('❌ Token não recebido:', data);
+            throw new Error('Token não recebido do servidor');
+        }
+
+        console.log('✅ Login bem-sucedido!');
+        console.log('🎫 Token:', data.token.substring(0, 20) + '...');
+        console.log('👤 User:', data.user);
 
         authToken = data.token;
         currentUser = data.user;
@@ -294,11 +358,20 @@ async function login(event) {
         localStorage.setItem('authToken', authToken);
         localStorage.setItem('currentUser', JSON.stringify(currentUser));
 
+        console.log('💾 Dados salvos no localStorage');
+
         updateNavbar();
+        
+        console.log('🏠 Navegando para home...');
         navigateHome();
+        
         document.getElementById('login-form').reset();
 
+        console.log('=== LOGIN CONCLUÍDO ===');
+
     } catch (error) {
+        console.error('💥 ERRO CAPTURADO:', error);
+        console.error('Stack:', error.stack);
         showMessage('login-messages', error.message, true);
     }
 }
@@ -373,14 +446,24 @@ async function deleteProduct(productId) {
 
 // ==================== RENDERIZAÇÃO ====================
 function updateNavbar() {
+    console.log('🔄 Atualizando navbar...');
+    
     const authButtons = document.getElementById('auth-buttons');
     const userMenu = document.getElementById('user-menu');
+    const userNameElement = document.getElementById('user-name');
+
+    if (!authButtons || !userMenu || !userNameElement) {
+        console.error('❌ Elementos da navbar não encontrados!');
+        return;
+    }
 
     if (currentUser) {
+        console.log('✅ Usuário logado, mostrando menu do usuário');
         authButtons.style.display = 'none';
         userMenu.style.display = 'block';
-        document.getElementById('user-name').textContent = currentUser.nome;
+        userNameElement.textContent = currentUser.nome;
     } else {
+        console.log('ℹ️ Sem usuário, mostrando botões de auth');
         authButtons.style.display = 'flex';
         userMenu.style.display = 'none';
     }
@@ -493,6 +576,7 @@ function updateCartQuantity(productId, newQuantity) {
 
 function updateCartBadge() {
     const badge = document.getElementById('cart-badge');
+    if (!badge) return;
     const totalItems = shoppingCart.reduce((sum, item) => sum + item.quantidade, 0);
     badge.textContent = totalItems;
     badge.style.display = totalItems > 0 ? 'flex' : 'none';
@@ -506,6 +590,8 @@ function showCart() {
 function renderCart() {
     const container = document.getElementById('cart-items');
     const subtotalElement = document.getElementById('cart-subtotal');
+
+    if (!container || !subtotalElement) return;
 
     if (shoppingCart.length === 0) {
         container.innerHTML = '<p style="text-align: center; padding: 2rem;">Seu carrinho está vazio</p>';
@@ -540,25 +626,36 @@ function filterByCategory(categoria) {
 
 // ==================== MOBILE ====================
 function openMobileSidebar() {
-    document.getElementById('mobile-sidebar').classList.add('active');
-    document.getElementById('sidebar-overlay').classList.add('active');
+    const sidebar = document.getElementById('mobile-sidebar');
+    const overlay = document.getElementById('sidebar-overlay');
+    if (sidebar) sidebar.classList.add('active');
+    if (overlay) overlay.classList.add('active');
 }
 
 function closeMobileSidebar() {
-    document.getElementById('mobile-sidebar').classList.remove('active');
-    document.getElementById('sidebar-overlay').classList.remove('active');
+    const sidebar = document.getElementById('mobile-sidebar');
+    const overlay = document.getElementById('sidebar-overlay');
+    if (sidebar) sidebar.classList.remove('active');
+    if (overlay) overlay.classList.remove('active');
 }
 
 // ==================== INICIALIZAÇÃO ====================
 document.addEventListener('DOMContentLoaded', () => {
+    console.log('🚀 Inicializando aplicação...');
+    
     const savedToken = localStorage.getItem('authToken');
     const savedUser = localStorage.getItem('currentUser');
     
     if (savedToken && savedUser) {
+        console.log('📝 Restaurando sessão do localStorage...');
         authToken = savedToken;
         currentUser = JSON.parse(savedUser);
+        console.log('✅ Sessão restaurada:', currentUser);
         updateNavbar();
+    } else {
+        console.log('ℹ️ Sem sessão salva');
     }
 
+    console.log('🏠 Navegando para home...');
     navigateHome();
 });
