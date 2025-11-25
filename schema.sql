@@ -1,3 +1,11 @@
+-- Deletar tabelas se existirem (para recomeçar limpo)
+DROP TABLE IF EXISTS order_items CASCADE;
+DROP TABLE IF EXISTS orders CASCADE;
+DROP TABLE IF EXISTS products CASCADE;
+DROP TABLE IF EXISTS addresses CASCADE;
+DROP TABLE IF EXISTS sellers CASCADE;
+DROP TABLE IF EXISTS users CASCADE;
+
 -- Tabela de Usuários (unificada)
 CREATE TABLE users (
     id SERIAL PRIMARY KEY,
@@ -83,11 +91,11 @@ CREATE INDEX idx_orders_comprador ON orders(comprador_id);
 CREATE INDEX idx_orders_vendedor ON orders(vendedor_id);
 CREATE INDEX idx_users_email ON users(email);
 
--- Inserir dados de teste
+-- Inserir dados de teste (senha: 12345678 para todos)
 INSERT INTO users (tipo, nome, email, senha_hash, telefone, cpf_cnpj, tipo_documento) VALUES
-('vendedor', 'Ana Mística', 'ana@tarotmistico.com', '$2b$10$abcdefghijklmnopqrstuvwxyz', '(11) 99999-9999', '12345678000190', 'CNPJ'),
-('vendedor', 'Roberto Herbalista', 'roberto@ervasraizes.com', '$2b$10$abcdefghijklmnopqrstuvwxyz', '(11) 88888-8888', '12345678900', 'CPF'),
-('cliente', 'Carlos Oliveira', 'carlos@email.com', '$2b$10$abcdefghijklmnopqrstuvwxyz', '(11) 77777-7777', NULL, NULL);
+('vendedor', 'Ana Mística', 'ana@tarotmistico.com', '$2a$10$rOiVGKqVj6LhCZqVqQ3.6OKX9F5bJYJ8K8F5bJYJ8K8F5bJYJ8K8Fa', '(11) 99999-9999', '12345678000190', 'CNPJ'),
+('vendedor', 'Roberto Herbalista', 'roberto@ervasraizes.com', '$2a$10$rOiVGKqVj6LhCZqVqQ3.6OKX9F5bJYJ8K8F5bJYJ8K8F5bJYJ8K8Fa', '(11) 88888-8888', '12345678900', 'CPF'),
+('cliente', 'Carlos Oliveira', 'carlos@email.com', '$2a$10$rOiVGKqVj6LhCZqVqQ3.6OKX9F5bJYJ8K8F5bJYJ8K8F5bJYJ8K8Fa', '(11) 77777-7777', NULL, NULL);
 
 INSERT INTO sellers (user_id, nome_loja, categoria, descricao_loja) VALUES
 (1, 'Tarot Místico', 'Tarô e Oráculos', 'Especialista em leituras de tarô com mais de 15 anos de experiência.'),

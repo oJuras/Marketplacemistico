@@ -16,31 +16,35 @@ export default async function handler(req, res) {
     return res.status(405).json({ error: 'Método não permitido' });
   }
 
-  console.log('=== INÍCIO DO REGISTRO ===');
-  console.log('Body recebido:', JSON.stringify(req.body, null, 2));
+  console.log('📝 Iniciando registro de usuário...');
+  console.log('Body:', JSON.stringify(req.body, null, 2));
 
   try {
     const { tipo, nome, email, senha, telefone, cpf_cnpj, nomeLoja, categoria, descricaoLoja } = req.body;
 
     // Validações
     if (!tipo || !nome || !email || !senha) {
-      console.log('Erro: Campos obrigatórios faltando');
+      console.log('❌ Campos obrigatórios faltando');
       return res.status(400).json({ error: 'Campos obrigatórios faltando' });
     }
 
-    console.log('Verificando email duplicado...');
+    console.log('✅ Validação inicial OK');
+
     // Verificar se email já existe
+    console.log('🔍 Verificando se email existe...');
     const existingUser = await query('SELECT id FROM users WHERE email = $1', [email]);
     
     if (existingUser.length > 0) {
-      console.log('Erro: Email já cadastrado');
+      console.log('❌ Email já cadastrado');
       return res.status(400).json({ error: 'Email já cadastrado' });
     }
 
-    console.log('Email disponível. Gerando hash da senha...');
+    console.log('✅ Email disponível');
+
     // Hash da senha
+    console.log('🔐 Gerando hash da senha...');
     const senhaHash = await bcryptjs.hash(senha, 10);
-    console.log('Hash gerado com sucesso');
+    console.log('✅ Hash gerado');
 
     // Determinar tipo de documento
     let tipoDocumento = null;
@@ -49,8 +53,8 @@ export default async function handler(req, res) {
       tipoDocumento = numbers.length === 11 ? 'CPF' : 'CNPJ';
     }
 
-    console.log('Inserindo usuário no banco...');
     // Inserir usuário
+    console.log('💾 Inserindo usuário no banco...');
     const userResult = await query(
       `INSERT INTO users (tipo, nome, email, senha_hash, telefone, cpf_cnpj, tipo_documento)
        VALUES ($1, $2, $3, $4, $5, $6, $7)
@@ -58,26 +62,27 @@ export default async function handler(req, res) {
       [tipo, nome, email, senhaHash, telefone, cpf_cnpj, tipoDocumento]
     );
 
-    console.log('Usuário inserido:', userResult[0]);
+    console.log('✅ Usuário inserido:', userResult[0]);
     const user = userResult[0];
 
     // Se for vendedor, criar registro de seller
     if (tipo === 'vendedor') {
-      console.log('Criando registro de vendedor...');
+      console.log('🏪 Criando registro de vendedor...');
       const sellerResult = await query(
         `INSERT INTO sellers (user_id, nome_loja, categoria, descricao_loja)
          VALUES ($1, $2, $3, $4)
          RETURNING id`,
         [user.id, nomeLoja, categoria, descricaoLoja]
       );
-      console.log('Vendedor criado:', sellerResult[0]);
+      console.log('✅ Vendedor criado:', sellerResult[0]);
       user.seller_id = sellerResult[0].id;
       user.nomeLoja = nomeLoja;
     }
 
-    console.log('=== REGISTRO CONCLUÍDO COM SUCESSO ===');
+    console.log('🎉 Registro concluído com sucesso!');
     return res.status(201).json({
       success: true,
+      message: 'Usuário criado com sucesso',
       user: {
         id: user.id,
         tipo: user.tipo,
@@ -89,8 +94,8 @@ export default async function handler(req, res) {
     });
 
   } catch (error) {
-    console.error('❌ ERRO NO REGISTRO:', error);
-    console.error('Stack trace:', error.stack);
+    console.error('💥 ERRO NO REGISTRO:', error);
+    console.error('Stack:', error.stack);
     return res.status(500).json({ 
       error: 'Erro ao criar usuário',
       details: error.message 

@@ -1,8 +1,8 @@
 {
   "name": "marketplace-mistico",
   "version": "1.0.0",
+  "type": "module",
   "description": "Marketplace místico com Neon + Vercel",
-  "main": "index.js",
   "scripts": {
     "dev": "vercel dev"
   },

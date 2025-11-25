@@ -1,5 +1,5 @@
 import { query } from '../db.js';
-import bcrypt from 'bcrypt';
+import bcryptjs from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 
 export default async function handler(req, res) {
@@ -16,6 +16,8 @@ export default async function handler(req, res) {
     return res.status(405).json({ error: 'Método não permitido' });
   }
 
+  console.log('🔑 Tentativa de login...');
+
   try {
     const { email, senha } = req.body;
 
@@ -24,6 +26,7 @@ export default async function handler(req, res) {
     }
 
     // Buscar usuário
+    console.log('🔍 Buscando usuário:', email);
     const users = await query(
       `SELECT u.*, s.id as seller_id, s.nome_loja, s.categoria, s.descricao_loja
        FROM users u
@@ -33,16 +36,23 @@ export default async function handler(req, res) {
     );
 
     if (users.length === 0) {
+      console.log('❌ Usuário não encontrado');
       return res.status(401).json({ error: 'Email ou senha incorretos' });
     }
 
     const user = users[0];
+    console.log('✅ Usuário encontrado:', user.nome);
 
     // Verificar senha
-    const senhaValida = await bcrypt.compare(senha, user.senha_hash);
+    console.log('🔐 Verificando senha...');
+    const senhaValida = await bcryptjs.compare(senha, user.senha_hash);
+    
     if (!senhaValida) {
+      console.log('❌ Senha incorreta');
       return res.status(401).json({ error: 'Email ou senha incorretos' });
     }
+
+    console.log('✅ Senha válida');
 
     // Gerar token JWT
     const token = jwt.sign(
@@ -63,6 +73,7 @@ export default async function handler(req, res) {
       }
     }
 
+    console.log('🎉 Login bem-sucedido!');
     return res.status(200).json({
       success: true,
       token,
@@ -82,7 +93,7 @@ export default async function handler(req, res) {
     });
 
   } catch (error) {
-    console.error('Erro no login:', error);
+    console.error('💥 ERRO NO LOGIN:', error);
     return res.status(500).json({ error: 'Erro ao fazer login' });
   }
 }

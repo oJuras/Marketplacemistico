@@ -1,43 +1,26 @@
-// Application State
+// ==================== CONFIGURAÇÃO INICIAL ====================
 let currentUser = null;
 let authToken = null;
 const API_BASE = '/api';
 
 const estadosBrasileiros = [
-    { code: 'AC', name: 'Acre' },
-    { code: 'AL', name: 'Alagoas' },
-    { code: 'AP', name: 'Amapá' },
-    { code: 'AM', name: 'Amazonas' },
-    { code: 'BA', name: 'Bahia' },
-    { code: 'CE', name: 'Ceará' },
-    { code: 'DF', name: 'Distrito Federal' },
-    { code: 'ES', name: 'Espírito Santo' },
-    { code: 'GO', name: 'Goiás' },
-    { code: 'MA', name: 'Maranhão' },
-    { code: 'MT', name: 'Mato Grosso' },
-    { code: 'MS', name: 'Mato Grosso do Sul' },
-    { code: 'MG', name: 'Minas Gerais' },
-    { code: 'PA', name: 'Pará' },
-    { code: 'PB', name: 'Paraíba' },
-    { code: 'PR', name: 'Paraná' },
-    { code: 'PE', name: 'Pernambuco' },
-    { code: 'PI', name: 'Piauí' },
-    { code: 'RJ', name: 'Rio de Janeiro' },
-    { code: 'RN', name: 'Rio Grande do Norte' },
-    { code: 'RS', name: 'Rio Grande do Sul' },
-    { code: 'RO', name: 'Rondônia' },
-    { code: 'RR', name: 'Roraima' },
-    { code: 'SC', name: 'Santa Catarina' },
-    { code: 'SP', name: 'São Paulo' },
-    { code: 'SE', name: 'Sergipe' },
-    { code: 'TO', name: 'Tocantins' }
+    { code: 'AC', name: 'Acre' }, { code: 'AL', name: 'Alagoas' }, { code: 'AP', name: 'Amapá' },
+    { code: 'AM', name: 'Amazonas' }, { code: 'BA', name: 'Bahia' }, { code: 'CE', name: 'Ceará' },
+    { code: 'DF', name: 'Distrito Federal' }, { code: 'ES', name: 'Espírito Santo' },
+    { code: 'GO', name: 'Goiás' }, { code: 'MA', name: 'Maranhão' }, { code: 'MT', name: 'Mato Grosso' },
+    { code: 'MS', name: 'Mato Grosso do Sul' }, { code: 'MG', name: 'Minas Gerais' },
+    { code: 'PA', name: 'Pará' }, { code: 'PB', name: 'Paraíba' }, { code: 'PR', name: 'Paraná' },
+    { code: 'PE', name: 'Pernambuco' }, { code: 'PI', name: 'Piauí' }, { code: 'RJ', name: 'Rio de Janeiro' },
+    { code: 'RN', name: 'Rio Grande do Norte' }, { code: 'RS', name: 'Rio Grande do Sul' },
+    { code: 'RO', name: 'Rondônia' }, { code: 'RR', name: 'Roraima' }, { code: 'SC', name: 'Santa Catarina' },
+    { code: 'SP', name: 'São Paulo' }, { code: 'SE', name: 'Sergipe' }, { code: 'TO', name: 'Tocantins' }
 ];
 
 let products = [];
 let shoppingCart = [];
 let currentFilter = 'Todos';
 
-// API Helper Functions
+// ==================== API HELPERS ====================
 async function apiRequest(endpoint, options = {}) {
     const headers = {
         'Content-Type': 'application/json',
@@ -48,21 +31,25 @@ async function apiRequest(endpoint, options = {}) {
         headers['Authorization'] = `Bearer ${authToken}`;
     }
 
-    const response = await fetch(`${API_BASE}${endpoint}`, {
-        ...options,
-        headers
-    });
+    try {
+        const response = await fetch(`${API_BASE}${endpoint}`, {
+            ...options,
+            headers
+        });
 
-    const data = await response.json();
+        const data = await response.json();
 
-    if (!response.ok) {
-        throw new Error(data.error || 'Erro na requisição');
+        if (!response.ok) {
+            throw new Error(data.error || 'Erro na requisição');
+        }
+
+        return data;
+    } catch (error) {
+        console.error('API Request Error:', error);
+        throw error;
     }
-
-    return data;
 }
 
-// Load products from API
 async function loadProducts(categoria = 'Todos') {
     try {
         const endpoint = categoria === 'Todos' 
@@ -74,11 +61,21 @@ async function loadProducts(categoria = 'Todos') {
         renderProducts();
     } catch (error) {
         console.error('Erro ao carregar produtos:', error);
-        showMessage('marketplace-messages', 'Erro ao carregar produtos', true);
     }
 }
 
-// Navigation Functions
+async function loadSellerProducts() {
+    if (!currentUser || !currentUser.seller_id) return;
+
+    try {
+        const data = await apiRequest(`/products?seller_id=${currentUser.seller_id}`);
+        renderSellerProducts(data.products);
+    } catch (error) {
+        console.error('Erro ao carregar produtos do vendedor:', error);
+    }
+}
+
+// ==================== NAVEGAÇÃO ====================
 function navigateHome() {
     const currentUser = getCurrentUser();
     if (!currentUser) {
@@ -123,7 +120,7 @@ function setUserTypeAndRegister(userType) {
     toggleSellerFields();
 }
 
-// Form Functions
+// ==================== FORMS ====================
 function toggleSellerFields() {
     const isVendedor = document.getElementById('tipo-vendedor').checked;
     const sellerFields = document.getElementById('seller-fields');
@@ -134,7 +131,7 @@ function toggleSellerFields() {
     }
 }
 
-// CPF/CNPJ Functions (mantém as mesmas)
+// ==================== VALIDAÇÕES ====================
 function formatCpfCnpj(input) {
     let value = input.value.replace(/\D/g, '');
     if (value.length <= 11) {
@@ -153,10 +150,7 @@ function formatCpfCnpj(input) {
 function validateCpfCnpj(cpfCnpj) {
     if (!cpfCnpj) return true;
     const numbers = cpfCnpj.replace(/\D/g, '');
-    if (numbers.length === 11 || numbers.length === 14) {
-        return true;
-    }
-    return false;
+    return numbers.length === 11 || numbers.length === 14;
 }
 
 function validateCpfCnpjField() {
@@ -171,7 +165,6 @@ function validateCpfCnpjField() {
     }
 }
 
-// Validation Functions (mantém as mesmas)
 function validateEmail() {
     const email = document.getElementById('email').value;
     const emailError = document.getElementById('email-error');
@@ -221,10 +214,9 @@ function showMessage(containerId, message, isError = false) {
     container.innerHTML = `<div class="${className}">${message}</div>`;
 }
 
-// Register Function - ADAPTADO
+// ==================== AUTENTICAÇÃO ====================
 async function register(event) {
     event.preventDefault();
-
     clearMessages();
 
     if (!validateEmail() || !validatePassword() || !validatePasswordMatch() || !validateCpfCnpjField()) {
@@ -244,14 +236,7 @@ async function register(event) {
         return;
     }
 
-    const userData = {
-        tipo,
-        nome,
-        email,
-        senha,
-        telefone,
-        cpf_cnpj
-    };
+    const userData = { tipo, nome, email, senha, telefone, cpf_cnpj };
 
     if (tipo === 'vendedor') {
         const nomeLoja = document.getElementById('nome-loja').value.trim();
@@ -269,7 +254,7 @@ async function register(event) {
     }
 
     try {
-        const data = await apiRequest('/auth/register', {
+        await apiRequest('/auth/register', {
             method: 'POST',
             body: JSON.stringify(userData)
         });
@@ -285,7 +270,6 @@ async function register(event) {
     }
 }
 
-// Login Function - ADAPTADO
 async function login(event) {
     event.preventDefault();
     clearMessages();
@@ -307,7 +291,6 @@ async function login(event) {
         authToken = data.token;
         currentUser = data.user;
         
-        // Salvar no localStorage
         localStorage.setItem('authToken', authToken);
         localStorage.setItem('currentUser', JSON.stringify(currentUser));
 
@@ -320,7 +303,6 @@ async function login(event) {
     }
 }
 
-// Logout
 function logout() {
     currentUser = null;
     authToken = null;
@@ -331,19 +313,7 @@ function logout() {
     loadProducts();
 }
 
-// Load Seller Products - ADAPTADO
-async function loadSellerProducts() {
-    if (!currentUser || !currentUser.seller_id) return;
-
-    try {
-        const data = await apiRequest(`/products?seller_id=${currentUser.seller_id}`);
-        renderSellerProducts(data.products);
-    } catch (error) {
-        console.error('Erro ao carregar produtos do vendedor:', error);
-    }
-}
-
-// Add Product - ADAPTADO
+// ==================== PRODUTOS ====================
 async function addProduct(event) {
     event.preventDefault();
 
@@ -369,13 +339,7 @@ async function addProduct(event) {
         await apiRequest('/products', {
             method: 'POST',
             body: JSON.stringify({
-                nome,
-                categoria,
-                descricao,
-                preco,
-                estoque,
-                imagemUrl,
-                publicado
+                nome, categoria, descricao, preco, estoque, imagemUrl, publicado
             })
         });
 
@@ -389,7 +353,6 @@ async function addProduct(event) {
     }
 }
 
-// Delete Product - ADAPTADO
 async function deleteProduct(productId) {
     if (!confirm('Tem certeza que deseja excluir este produto?')) {
         return;
@@ -408,7 +371,7 @@ async function deleteProduct(productId) {
     }
 }
 
-// Update Navbar
+// ==================== RENDERIZAÇÃO ====================
 function updateNavbar() {
     const authButtons = document.getElementById('auth-buttons');
     const userMenu = document.getElementById('user-menu');
@@ -423,7 +386,6 @@ function updateNavbar() {
     }
 }
 
-// Render Products
 function renderProducts() {
     const container = document.getElementById('products-grid');
     
@@ -448,7 +410,6 @@ function renderProducts() {
     `).join('');
 }
 
-// Render Seller Products
 function renderSellerProducts(sellerProducts) {
     const container = document.getElementById('seller-products-list');
     
@@ -499,7 +460,7 @@ function renderSellerProducts(sellerProducts) {
     `;
 }
 
-// Shopping Cart Functions (mantém as mesmas)
+// ==================== CARRINHO ====================
 function addToCart(productId) {
     const product = products.find(p => p.id === productId);
     if (!product) return;
@@ -508,10 +469,7 @@ function addToCart(productId) {
     if (existingItem) {
         existingItem.quantidade++;
     } else {
-        shoppingCart.push({
-            ...product,
-            quantidade: 1
-        });
+        shoppingCart.push({ ...product, quantidade: 1 });
     }
 
     updateCartBadge();
@@ -577,14 +535,10 @@ function renderCart() {
 
 function filterByCategory(categoria) {
     currentFilter = categoria;
-    document.querySelectorAll('.category-card').forEach(card => {
-        card.classList.remove('active');
-    });
-    event.target.closest('.category-card').classList.add('active');
     loadProducts(categoria);
 }
 
-// Mobile Sidebar
+// ==================== MOBILE ====================
 function openMobileSidebar() {
     document.getElementById('mobile-sidebar').classList.add('active');
     document.getElementById('sidebar-overlay').classList.add('active');
@@ -595,9 +549,8 @@ function closeMobileSidebar() {
     document.getElementById('sidebar-overlay').classList.remove('active');
 }
 
-// Initialize on page load
+// ==================== INICIALIZAÇÃO ====================
 document.addEventListener('DOMContentLoaded', () => {
-    // Recuperar sessão do localStorage
     const savedToken = localStorage.getItem('authToken');
     const savedUser = localStorage.getItem('currentUser');
     

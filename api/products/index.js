@@ -89,6 +89,7 @@ export default async function handler(req, res) {
         [sellerId, nome, categoria, descricao, preco, estoque || 0, imagemUrl || '', publicado || false]
       );
 
+      console.log('✅ Produto criado:', result[0]);
       return res.status(201).json({ success: true, product: result[0] });
 
     } catch (error) {

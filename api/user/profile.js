@@ -46,61 +46,14 @@ export default async function handler(req, res) {
       const userData = users[0];
       delete userData.senha_hash;
 
-      // Buscar endereço
-      const addresses = await query(
-        'SELECT * FROM addresses WHERE user_id = $1 AND is_default = true LIMIT 1',
-        [user.id]
-      );
-
       return res.status(200).json({
         success: true,
-        user: userData,
-        endereco: addresses.length > 0 ? addresses[0] : null
+        user: userData
       });
 
     } catch (error) {
       console.error('Erro ao buscar perfil:', error);
       return res.status(500).json({ error: 'Erro ao buscar perfil' });
-    }
-  }
-
-  // PUT - Atualizar perfil
-  if (req.method === 'PUT') {
-    try {
-      const { nome, telefone, endereco } = req.body;
-
-      if (nome) {
-        await query('UPDATE users SET nome = $1, updated_at = CURRENT_TIMESTAMP WHERE id = $2', [nome, user.id]);
-      }
-
-      if (telefone) {
-        await query('UPDATE users SET telefone = $1, updated_at = CURRENT_TIMESTAMP WHERE id = $2', [telefone, user.id]);
-      }
-
-      // Atualizar/criar endereço se fornecido
-      if (endereco && user.tipo === 'cliente') {
-        const existingAddresses = await query('SELECT id FROM addresses WHERE user_id = $1 AND is_default = true', [user.id]);
-        
-        if (existingAddresses.length > 0) {
-          await query(
-            `UPDATE addresses SET cep = $1, rua = $2, numero = $3, complemento = $4, bairro = $5, cidade = $6, estado = $7
-             WHERE user_id = $8 AND is_default = true`,
-            [endereco.cep, endereco.rua, endereco.numero, endereco.complemento, endereco.bairro, endereco.cidade, endereco.estado, user.id]
-          );
-        } else {
-          await query(
-            `INSERT INTO addresses (user_id, cep, rua, numero, complemento, bairro, cidade, estado, is_default)
-             VALUES ($1, $2, $3, $4, $5, $6, $7, $8, true)`,
-            [user.id, endereco.cep, endereco.rua, endereco.numero, endereco.complemento, endereco.bairro, endereco.cidade, endereco.estado]
-          );
-        }
-      }
-
-      return res.status(200).json({ success: true, message: 'Perfil atualizado' });
-
-    } catch (error) {
-      console.error('Erro ao atualizar perfil:', error);
-      return res.status(500).json({ error: 'Erro ao atualizar perfil' });
     }
   }
 

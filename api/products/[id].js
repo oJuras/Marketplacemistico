@@ -48,44 +48,6 @@ export default async function handler(req, res) {
     }
   }
 
-  // PUT - Atualizar produto
-  if (req.method === 'PUT') {
-    try {
-      const user = verifyToken(req);
-      if (!user || user.tipo !== 'vendedor') {
-        return res.status(403).json({ error: 'Acesso negado' });
-      }
-
-      const { nome, categoria, descricao, preco, estoque, imagemUrl, publicado } = req.body;
-
-      // Verificar se o produto pertence ao vendedor
-      const sellers = await query('SELECT id FROM sellers WHERE user_id = $1', [user.id]);
-      if (sellers.length === 0) {
-        return res.status(403).json({ error: 'Vendedor não encontrado' });
-      }
-      const sellerId = sellers[0].id;
-
-      const products = await query('SELECT * FROM products WHERE id = $1 AND seller_id = $2', [id, sellerId]);
-      if (products.length === 0) {
-        return res.status(404).json({ error: 'Produto não encontrado ou sem permissão' });
-      }
-
-      const result = await query(
-        `UPDATE products
-         SET nome = $1, categoria = $2, descricao = $3, preco = $4, estoque = $5, imagem_url = $6, publicado = $7, updated_at = CURRENT_TIMESTAMP
-         WHERE id = $8
-         RETURNING *`,
-        [nome, categoria, descricao, preco, estoque, imagemUrl, publicado, id]
-      );
-
-      return res.status(200).json({ success: true, product: result[0] });
-
-    } catch (error) {
-      console.error('Erro ao atualizar produto:', error);
-      return res.status(500).json({ error: 'Erro ao atualizar produto' });
-    }
-  }
-
   // DELETE - Deletar produto
   if (req.method === 'DELETE') {
     try {
@@ -109,6 +71,7 @@ export default async function handler(req, res) {
         return res.status(404).json({ error: 'Produto não encontrado ou sem permissão' });
       }
 
+      console.log('✅ Produto deletado:', id);
       return res.status(200).json({ success: true, message: 'Produto deletado' });
 
     } catch (error) {
