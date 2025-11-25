@@ -1,5 +1,5 @@
 import { query } from '../db.js';
-import bcrypt from 'bcrypt';
+import bcryptjs from 'bcryptjs';
 
 export default async function handler(req, res) {
   // CORS headers
@@ -16,22 +16,31 @@ export default async function handler(req, res) {
     return res.status(405).json({ error: 'Método não permitido' });
   }
 
+  console.log('=== INÍCIO DO REGISTRO ===');
+  console.log('Body recebido:', JSON.stringify(req.body, null, 2));
+
   try {
     const { tipo, nome, email, senha, telefone, cpf_cnpj, nomeLoja, categoria, descricaoLoja } = req.body;
 
     // Validações
     if (!tipo || !nome || !email || !senha) {
+      console.log('Erro: Campos obrigatórios faltando');
       return res.status(400).json({ error: 'Campos obrigatórios faltando' });
     }
 
+    console.log('Verificando email duplicado...');
     // Verificar se email já existe
     const existingUser = await query('SELECT id FROM users WHERE email = $1', [email]);
+    
     if (existingUser.length > 0) {
+      console.log('Erro: Email já cadastrado');
       return res.status(400).json({ error: 'Email já cadastrado' });
     }
 
+    console.log('Email disponível. Gerando hash da senha...');
     // Hash da senha
-    const senhaHash = await bcrypt.hash(senha, 10);
+    const senhaHash = await bcryptjs.hash(senha, 10);
+    console.log('Hash gerado com sucesso');
 
     // Determinar tipo de documento
     let tipoDocumento = null;
@@ -40,6 +49,7 @@ export default async function handler(req, res) {
       tipoDocumento = numbers.length === 11 ? 'CPF' : 'CNPJ';
     }
 
+    console.log('Inserindo usuário no banco...');
     // Inserir usuário
     const userResult = await query(
       `INSERT INTO users (tipo, nome, email, senha_hash, telefone, cpf_cnpj, tipo_documento)
@@ -48,20 +58,24 @@ export default async function handler(req, res) {
       [tipo, nome, email, senhaHash, telefone, cpf_cnpj, tipoDocumento]
     );
 
+    console.log('Usuário inserido:', userResult[0]);
     const user = userResult[0];
 
     // Se for vendedor, criar registro de seller
     if (tipo === 'vendedor') {
+      console.log('Criando registro de vendedor...');
       const sellerResult = await query(
         `INSERT INTO sellers (user_id, nome_loja, categoria, descricao_loja)
          VALUES ($1, $2, $3, $4)
          RETURNING id`,
         [user.id, nomeLoja, categoria, descricaoLoja]
       );
+      console.log('Vendedor criado:', sellerResult[0]);
       user.seller_id = sellerResult[0].id;
       user.nomeLoja = nomeLoja;
     }
 
+    console.log('=== REGISTRO CONCLUÍDO COM SUCESSO ===');
     return res.status(201).json({
       success: true,
       user: {
@@ -75,7 +89,11 @@ export default async function handler(req, res) {
     });
 
   } catch (error) {
-    console.error('Erro no registro:', error);
-    return res.status(500).json({ error: 'Erro ao criar usuário' });
+    console.error('❌ ERRO NO REGISTRO:', error);
+    console.error('Stack trace:', error.stack);
+    return res.status(500).json({ 
+      error: 'Erro ao criar usuário',
+      details: error.message 
+    });
   }
 }
