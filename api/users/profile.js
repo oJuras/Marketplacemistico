@@ -42,7 +42,7 @@ export default async function handler(req, res) {
         return res.status(404).json({ error: 'Usuário não encontrado' });
       }
 
-      const userData = users;
+      const userData = users[0];
       delete userData.senha_hash;
 
       return res.status(200).json({
