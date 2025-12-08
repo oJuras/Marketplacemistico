@@ -254,7 +254,7 @@ async function register(event) {
 
     if (tipo === 'vendedor') {
         const nomeLoja = document.getElementById('nome-loja').value.trim();
-        const categoria = document.getElementById('categoria-loja').value;
+        const categoria = document.getElementById('categoria').value;
         const descricaoLoja = document.getElementById('descricao-loja').value.trim();
 
         if (!nomeLoja || !categoria) {
@@ -395,13 +395,13 @@ async function addProduct(event) {
         return;
     }
 
-    const nome = document.getElementById('product-nome').value.trim();
-    const categoria = document.getElementById('product-categoria').value;
-    const descricao = document.getElementById('product-descricao').value.trim();
-    const preco = parseFloat(document.getElementById('product-preco').value);
-    const estoque = parseInt(document.getElementById('product-estoque').value);
-    const imagemUrl = document.getElementById('product-imagem').value.trim();
-    const publicado = document.getElementById('product-publicado').checked;
+    const nome = document.getElementById('product-name').value.trim();
+    const categoria = document.getElementById('product-category').value;
+    const descricao = document.getElementById('product-description').value.trim();
+    const preco = parseFloat(document.getElementById('product-price').value);
+    const estoque = parseInt(document.getElementById('product-stock').value);
+    const imagemUrl = document.getElementById('product-image').value.trim();
+    const publicado = document.getElementById('product-published').checked;
 
     if (!nome || !categoria || isNaN(preco)) {
         alert('Preencha todos os campos obrigatórios');
@@ -416,7 +416,7 @@ async function addProduct(event) {
             })
         });
 
-        document.getElementById('add-product-form').reset();
+        document.getElementById('addProductForm').reset();
         showPage('products-list');
         await loadSellerProducts();
         alert('Produto adicionado com sucesso!');
@@ -646,6 +646,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Attach form event listeners
     const registrationForm = document.getElementById('registrationForm');
     const loginForm = document.getElementById('loginForm');
+    const addProductForm = document.getElementById('addProductForm');
     
     if (registrationForm) {
         registrationForm.addEventListener('submit', register);
@@ -659,6 +660,13 @@ document.addEventListener('DOMContentLoaded', () => {
         console.log('✅ Login form event listener attached');
     } else {
         console.error('❌ Login form not found!');
+    }
+    
+    if (addProductForm) {
+        addProductForm.addEventListener('submit', addProduct);
+        console.log('✅ Add product form event listener attached');
+    } else {
+        console.log('ℹ️ Add product form not found (will be attached when page loads)');
     }
     
     const savedToken = localStorage.getItem('authToken');
