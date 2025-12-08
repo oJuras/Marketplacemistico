@@ -276,7 +276,7 @@ async function register(event) {
         showMessage('registration-messages', 'Cadastro realizado com sucesso! Faça login para continuar.');
         setTimeout(() => {
             showPage('login');
-            document.getElementById('registration-form').reset();
+            document.getElementById('registrationForm').reset();
         }, 2000);
 
     } catch (error) {
@@ -365,7 +365,7 @@ async function login(event) {
         console.log('🏠 Navegando para home...');
         navigateHome();
         
-        document.getElementById('login-form').reset();
+        document.getElementById('loginForm').reset();
 
         console.log('=== LOGIN CONCLUÍDO ===');
 
@@ -642,6 +642,24 @@ function closeMobileSidebar() {
 // ==================== INICIALIZAÇÃO ====================
 document.addEventListener('DOMContentLoaded', () => {
     console.log('🚀 Inicializando aplicação...');
+    
+    // Attach form event listeners
+    const registrationForm = document.getElementById('registrationForm');
+    const loginForm = document.getElementById('loginForm');
+    
+    if (registrationForm) {
+        registrationForm.addEventListener('submit', register);
+        console.log('✅ Registration form event listener attached');
+    } else {
+        console.error('❌ Registration form not found!');
+    }
+    
+    if (loginForm) {
+        loginForm.addEventListener('submit', login);
+        console.log('✅ Login form event listener attached');
+    } else {
+        console.error('❌ Login form not found!');
+    }
     
     const savedToken = localStorage.getItem('authToken');
     const savedUser = localStorage.getItem('currentUser');
