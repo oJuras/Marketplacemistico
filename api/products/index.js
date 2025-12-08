@@ -71,7 +71,7 @@ export default async function handler(req, res) {
       if (sellers.length === 0) {
         return res.status(404).json({ error: 'Vendedor não encontrado' });
       }
-      const sellerId = sellers.id;
+      const sellerId = sellers[0].id;
 
       const { nome, categoria, descricao, preco, estoque, imagemUrl, publicado } = req.body;
 
@@ -87,7 +87,7 @@ export default async function handler(req, res) {
       );
 
       console.log('✅ Produto criado:', result);
-      return res.status(201).json({ success: true, product: result });
+      return res.status(201).json({ success: true, product: result[0] });
 
     } catch (error) {
       console.error('Erro ao criar produto:', error);

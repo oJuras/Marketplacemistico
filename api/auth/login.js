@@ -39,7 +39,7 @@ export default async function handler(req, res) {
       return res.status(401).json({ error: 'Email ou senha incorretos' });
     }
 
-    const user = users;
+    const user = users[0];
     console.log('✅ Usuário encontrado:', user.nome);
 
     console.log('🔐 Verificando senha...');
@@ -65,7 +65,7 @@ export default async function handler(req, res) {
         [user.id]
       );
       if (addresses.length > 0) {
-        endereco = addresses;
+        endereco = addresses[0];
       }
     }
 
