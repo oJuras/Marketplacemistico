@@ -39,7 +39,7 @@ export default async function handler(req, res) {
         return res.status(404).json({ error: 'Produto não encontrado' });
       }
 
-      return res.status(200).json({ success: true, product: products });
+      return res.status(200).json({ success: true, product: products[0] });
 
     } catch (error) {
       console.error('Erro ao buscar produto:', error);
@@ -58,7 +58,7 @@ export default async function handler(req, res) {
       if (sellers.length === 0) {
         return res.status(403).json({ error: 'Vendedor não encontrado' });
       }
-      const sellerId = sellers.id;
+      const sellerId = sellers[0].id;
 
       const result = await query(
         'DELETE FROM products WHERE id = $1 AND seller_id = $2 RETURNING id',

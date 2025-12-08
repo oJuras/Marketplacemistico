@@ -57,7 +57,7 @@ export default async function handler(req, res) {
     );
 
     console.log('✅ Usuário inserido:', userResult);
-    const user = userResult;
+    const user = userResult[0];
 
     if (tipo === 'vendedor') {
       console.log('🏪 Criando registro de vendedor...');
@@ -68,7 +68,7 @@ export default async function handler(req, res) {
         [user.id, nomeLoja, categoria, descricaoLoja]
       );
       console.log('✅ Vendedor criado:', sellerResult);
-      user.seller_id = sellerResult.id;
+      user.seller_id = sellerResult[0].id;
       user.nomeLoja = nomeLoja;
     }
 
