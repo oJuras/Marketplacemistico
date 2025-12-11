@@ -90,14 +90,40 @@ function navigateHome() {
         console.log('➡️ Vendedor, indo para dashboard-vendedor');
         showPage('dashboard-vendedor');
         loadSellerProducts();
+        populateSellerDashboard();
     } else if (user.tipo === 'cliente') {
         console.log('➡️ Cliente, indo para dashboard-cliente');
         showPage('dashboard-cliente');
         loadProducts();
+        populateClienteDashboard();
     } else {
         console.log('➡️ Tipo desconhecido, indo para marketplace');
         showPage('marketplace');
         loadProducts();
+    }
+}
+
+function populateSellerDashboard() {
+    if (!currentUser || currentUser.tipo !== 'vendedor') return;
+    
+    const sellerNameEl = document.getElementById('seller-name');
+    const storeNameEl = document.getElementById('store-name');
+    
+    if (sellerNameEl) {
+        sellerNameEl.textContent = currentUser.nome || 'Vendedor';
+    }
+    if (storeNameEl) {
+        storeNameEl.textContent = currentUser.nome_loja || 'Sua Loja';
+    }
+}
+
+function populateClienteDashboard() {
+    if (!currentUser || currentUser.tipo !== 'cliente') return;
+    
+    const customerNameEl = document.getElementById('customer-name');
+    
+    if (customerNameEl) {
+        customerNameEl.textContent = currentUser.nome || 'Cliente';
     }
 }
 
@@ -141,13 +167,13 @@ function showDashboardSection(userType, section) {
         if (userType === 'cliente') {
             showPage('cliente-profile');
         } else {
-            showPage('vendedor-profile');
+            showPage('seller-profile');
         }
     } else if (section === 'pedidos') {
         // Future implementation: show orders page
         alert('Seção de pedidos em desenvolvimento');
     } else if (section === 'produtos') {
-        showPage('products-list');
+        showPage('seller-products');
         loadSellerProducts();
     } else if (section === 'adicionar') {
         showPage('add-product');
@@ -638,6 +664,18 @@ function renderSellerProducts(sellerProducts) {
 
 // ==================== CARRINHO ====================
 function addToCart(productId) {
+    // Check if user is logged in
+    if (!currentUser) {
+        showLoginModal();
+        return;
+    }
+    
+    // Only clientes can add to cart
+    if (currentUser.tipo !== 'cliente') {
+        alert('Apenas clientes podem adicionar produtos ao carrinho');
+        return;
+    }
+    
     const product = products.find(p => p.id === productId);
     if (!product) return;
 
@@ -669,10 +707,17 @@ function updateCartQuantity(productId, newQuantity) {
 
 function updateCartBadge() {
     const badge = document.getElementById('cart-badge');
-    if (!badge) return;
+    const mobileCartCount = document.getElementById('mobile-cart-count');
     const totalItems = shoppingCart.reduce((sum, item) => sum + item.quantidade, 0);
-    badge.textContent = totalItems;
-    badge.style.display = totalItems > 0 ? 'flex' : 'none';
+    
+    if (badge) {
+        badge.textContent = totalItems;
+        badge.style.display = totalItems > 0 ? 'flex' : 'none';
+    }
+    
+    if (mobileCartCount) {
+        mobileCartCount.textContent = totalItems;
+    }
 }
 
 function showCart() {
@@ -754,6 +799,31 @@ function navigateFromSidebar(pageId) {
 function logoutFromSidebar() {
     closeMobileSidebar();
     logout();
+}
+
+// ==================== LOGIN MODAL ====================
+function showLoginModal() {
+    const modal = document.getElementById('loginModal');
+    if (modal) {
+        modal.style.display = 'flex';
+    }
+}
+
+function closeLoginModal() {
+    const modal = document.getElementById('loginModal');
+    if (modal) {
+        modal.style.display = 'none';
+    }
+}
+
+function goToLogin() {
+    closeLoginModal();
+    showPage('login');
+}
+
+function goToRegister() {
+    closeLoginModal();
+    showPage('registro');
 }
 
 // ==================== INICIALIZAÇÃO ====================
