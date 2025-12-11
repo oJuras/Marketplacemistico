@@ -166,8 +166,10 @@ function showDashboardSection(userType, section) {
     } else if (section === 'perfil') {
         if (userType === 'cliente') {
             showPage('cliente-profile');
+            populateClienteProfile();
         } else {
             showPage('seller-profile');
+            populateSellerProfile();
         }
     } else if (section === 'pedidos') {
         // Future implementation: show orders page
@@ -178,6 +180,32 @@ function showDashboardSection(userType, section) {
     } else if (section === 'adicionar') {
         showPage('add-product');
     }
+}
+
+function populateClienteProfile() {
+    if (!currentUser || currentUser.tipo !== 'cliente') return;
+    
+    const setDisplayText = (id, value) => {
+        const el = document.getElementById(id);
+        if (el) el.textContent = value || 'Não informado';
+    };
+    
+    setDisplayText('cliente-display-nome', currentUser.nome);
+    setDisplayText('cliente-display-email', currentUser.email);
+    setDisplayText('cliente-display-telefone', currentUser.telefone);
+    setDisplayText('cliente-display-cep', currentUser.cep);
+    setDisplayText('cliente-display-rua', currentUser.rua);
+    setDisplayText('cliente-display-numero', currentUser.numero);
+    setDisplayText('cliente-display-complemento', currentUser.complemento);
+    setDisplayText('cliente-display-bairro', currentUser.bairro);
+    setDisplayText('cliente-display-cidade', currentUser.cidade);
+    setDisplayText('cliente-display-estado', currentUser.estado);
+}
+
+function populateSellerProfile() {
+    // Future implementation: populate seller profile
+    if (!currentUser || currentUser.tipo !== 'vendedor') return;
+    // Seller profile population will be implemented when needed
 }
 
 function goToMarketplaceWithCategory(category) {
@@ -199,6 +227,69 @@ function toggleSellerFields() {
     } else {
         sellerFields.classList.remove('show');
     }
+}
+
+// ==================== PROFILE EDITING ====================
+function enterClienteEditMode() {
+    const viewMode = document.getElementById('cliente-profile-view-mode');
+    const editMode = document.getElementById('cliente-profile-edit-mode');
+    
+    if (viewMode) viewMode.style.display = 'none';
+    if (editMode) editMode.style.display = 'block';
+    
+    // Populate edit form with current user data
+    if (currentUser) {
+        const setFieldValue = (id, value) => {
+            const field = document.getElementById(id);
+            if (field) field.value = value || '';
+        };
+        
+        setFieldValue('edit-cliente-nome', currentUser.nome);
+        setFieldValue('edit-cliente-telefone', currentUser.telefone);
+        setFieldValue('edit-cliente-cep', currentUser.cep);
+        setFieldValue('edit-cliente-rua', currentUser.rua);
+        setFieldValue('edit-cliente-numero', currentUser.numero);
+        setFieldValue('edit-cliente-complemento', currentUser.complemento);
+        setFieldValue('edit-cliente-bairro', currentUser.bairro);
+        setFieldValue('edit-cliente-cidade', currentUser.cidade);
+        setFieldValue('edit-cliente-estado', currentUser.estado);
+        
+        const emailDisplay = document.getElementById('edit-cliente-display-email');
+        if (emailDisplay) emailDisplay.textContent = currentUser.email;
+    }
+}
+
+function cancelClienteEditMode() {
+    const viewMode = document.getElementById('cliente-profile-view-mode');
+    const editMode = document.getElementById('cliente-profile-edit-mode');
+    
+    if (viewMode) viewMode.style.display = 'block';
+    if (editMode) editMode.style.display = 'none';
+}
+
+function enterEditMode() {
+    // For seller profile editing (similar to cliente)
+    alert('Edição de perfil do vendedor em desenvolvimento');
+}
+
+function cancelEditMode() {
+    // For seller profile editing
+    alert('Edição de perfil do vendedor em desenvolvimento');
+}
+
+function cancelAddProduct() {
+    // Cancel adding product and return to products list
+    showPage('seller-products');
+}
+
+function contactSeller(sellerId) {
+    // Future implementation: contact seller
+    alert('Funcionalidade de contato em desenvolvimento');
+}
+
+function filterStoreByCategory(categoria) {
+    // Future implementation: filter store products by category
+    filterByCategory(categoria);
 }
 
 // ==================== VALIDAÇÕES ====================
@@ -288,6 +379,16 @@ function showMessage(containerId, message, isError = false) {
 }
 
 // ==================== AUTENTICAÇÃO ====================
+function handleGoogleRegister() {
+    // Future implementation: Google OAuth registration
+    alert('Login com Google em desenvolvimento. Por favor, use o formulário de registro tradicional.');
+}
+
+function handleGoogleLogin() {
+    // Future implementation: Google OAuth login
+    alert('Login com Google em desenvolvimento. Por favor, use o formulário de login tradicional.');
+}
+
 async function register(event) {
     event.preventDefault();
     clearMessages();
