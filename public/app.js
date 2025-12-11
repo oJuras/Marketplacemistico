@@ -131,6 +131,39 @@ function setUserTypeAndRegister(userType) {
     toggleSellerFields();
 }
 
+function showDashboardSection(userType, section) {
+    console.log(`📊 Mostrando seção ${section} para ${userType}`);
+    
+    // For now, just show the appropriate page based on section
+    if (section === 'carrinho') {
+        showPage('carrinho');
+    } else if (section === 'perfil') {
+        if (userType === 'cliente') {
+            showPage('cliente-profile');
+        } else {
+            showPage('vendedor-profile');
+        }
+    } else if (section === 'pedidos') {
+        // Future implementation: show orders page
+        alert('Seção de pedidos em desenvolvimento');
+    } else if (section === 'produtos') {
+        showPage('products-list');
+        loadSellerProducts();
+    } else if (section === 'adicionar') {
+        showPage('add-product');
+    }
+}
+
+function goToMarketplaceWithCategory(category) {
+    showPage('marketplace');
+    filterByCategory(category);
+}
+
+function showMyStore() {
+    // Future implementation: show seller's public store page
+    alert('Visualização da loja em desenvolvimento');
+}
+
 // ==================== FORMS ====================
 function toggleSellerFields() {
     const isVendedor = document.getElementById('tipo-vendedor').checked;
@@ -448,24 +481,84 @@ async function deleteProduct(productId) {
 function updateNavbar() {
     console.log('🔄 Atualizando navbar...');
     
-    const authButtons = document.getElementById('auth-buttons');
-    const userMenu = document.getElementById('user-menu');
-    const userNameElement = document.getElementById('user-name');
-
-    if (!authButtons || !userMenu || !userNameElement) {
-        console.error('❌ Elementos da navbar não encontrados!');
-        return;
-    }
+    // Desktop navigation elements
+    const navLoginLink = document.getElementById('nav-login-link');
+    const navRegisterLink = document.getElementById('nav-register-link');
+    const logoutLink = document.getElementById('logout-link');
+    const cartNavLink = document.getElementById('cart-nav-link');
+    
+    // Mobile sidebar elements
+    const mobileLoginLink = document.getElementById('mobile-login-link');
+    const mobileRegisterLink = document.getElementById('mobile-register-link');
+    const mobileLogoutLink = document.getElementById('mobile-logout-link');
+    const mobileCartLink = document.getElementById('mobile-cart-link');
 
     if (currentUser) {
-        console.log('✅ Usuário logado, mostrando menu do usuário');
-        authButtons.style.display = 'none';
-        userMenu.style.display = 'block';
-        userNameElement.textContent = currentUser.nome;
+        console.log('✅ Usuário logado:', currentUser.tipo);
+        
+        // Hide login/register links
+        if (navLoginLink) navLoginLink.style.display = 'none';
+        if (navRegisterLink) navRegisterLink.style.display = 'none';
+        if (mobileLoginLink) mobileLoginLink.style.display = 'none';
+        if (mobileRegisterLink) mobileRegisterLink.style.display = 'none';
+        
+        // Show logout link
+        if (logoutLink) {
+            logoutLink.classList.remove('hidden');
+            logoutLink.style.display = 'block';
+        }
+        if (mobileLogoutLink) {
+            mobileLogoutLink.classList.remove('hidden');
+            mobileLogoutLink.style.display = 'block';
+        }
+        
+        // Show cart only for cliente users
+        if (currentUser.tipo === 'cliente') {
+            if (cartNavLink) {
+                cartNavLink.classList.remove('hidden');
+                cartNavLink.style.display = 'block';
+            }
+            if (mobileCartLink) {
+                mobileCartLink.classList.remove('hidden');
+                mobileCartLink.style.display = 'block';
+            }
+        } else {
+            // Hide cart for vendedor users
+            if (cartNavLink) {
+                cartNavLink.classList.add('hidden');
+                cartNavLink.style.display = 'none';
+            }
+            if (mobileCartLink) {
+                mobileCartLink.classList.add('hidden');
+                mobileCartLink.style.display = 'none';
+            }
+        }
     } else {
         console.log('ℹ️ Sem usuário, mostrando botões de auth');
-        authButtons.style.display = 'flex';
-        userMenu.style.display = 'none';
+        
+        // Show login/register links
+        if (navLoginLink) navLoginLink.style.display = 'block';
+        if (navRegisterLink) navRegisterLink.style.display = 'block';
+        if (mobileLoginLink) mobileLoginLink.style.display = 'block';
+        if (mobileRegisterLink) mobileRegisterLink.style.display = 'block';
+        
+        // Hide logout and cart links
+        if (logoutLink) {
+            logoutLink.classList.add('hidden');
+            logoutLink.style.display = 'none';
+        }
+        if (mobileLogoutLink) {
+            mobileLogoutLink.classList.add('hidden');
+            mobileLogoutLink.style.display = 'none';
+        }
+        if (cartNavLink) {
+            cartNavLink.classList.add('hidden');
+            cartNavLink.style.display = 'none';
+        }
+        if (mobileCartLink) {
+            mobileCartLink.classList.add('hidden');
+            mobileCartLink.style.display = 'none';
+        }
     }
 }
 
@@ -625,18 +718,42 @@ function filterByCategory(categoria) {
 }
 
 // ==================== MOBILE ====================
+function toggleMobileSidebar() {
+    const sidebar = document.querySelector('.mobile-sidebar');
+    const overlay = document.querySelector('.sidebar-overlay');
+    
+    if (sidebar && overlay) {
+        const isActive = sidebar.classList.contains('active');
+        if (isActive) {
+            closeMobileSidebar();
+        } else {
+            openMobileSidebar();
+        }
+    }
+}
+
 function openMobileSidebar() {
-    const sidebar = document.getElementById('mobile-sidebar');
-    const overlay = document.getElementById('sidebar-overlay');
+    const sidebar = document.querySelector('.mobile-sidebar');
+    const overlay = document.querySelector('.sidebar-overlay');
     if (sidebar) sidebar.classList.add('active');
     if (overlay) overlay.classList.add('active');
 }
 
 function closeMobileSidebar() {
-    const sidebar = document.getElementById('mobile-sidebar');
-    const overlay = document.getElementById('sidebar-overlay');
+    const sidebar = document.querySelector('.mobile-sidebar');
+    const overlay = document.querySelector('.sidebar-overlay');
     if (sidebar) sidebar.classList.remove('active');
     if (overlay) overlay.classList.remove('active');
+}
+
+function navigateFromSidebar(pageId) {
+    closeMobileSidebar();
+    showPage(pageId);
+}
+
+function logoutFromSidebar() {
+    closeMobileSidebar();
+    logout();
 }
 
 // ==================== INICIALIZAÇÃO ====================
