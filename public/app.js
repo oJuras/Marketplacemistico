@@ -639,26 +639,14 @@ function updateNavbar() {
             mobileLogoutLink.style.display = 'block';
         }
         
-        // Show cart only for cliente users
-        if (currentUser.tipo === 'cliente') {
-            if (cartNavLink) {
-                cartNavLink.classList.remove('hidden');
-                cartNavLink.style.display = 'block';
-            }
-            if (mobileCartLink) {
-                mobileCartLink.classList.remove('hidden');
-                mobileCartLink.style.display = 'block';
-            }
-        } else {
-            // Hide cart for vendedor users
-            if (cartNavLink) {
-                cartNavLink.classList.add('hidden');
-                cartNavLink.style.display = 'none';
-            }
-            if (mobileCartLink) {
-                mobileCartLink.classList.add('hidden');
-                mobileCartLink.style.display = 'none';
-            }
+        // Show cart for all logged-in users (vendors can also buy)
+        if (cartNavLink) {
+            cartNavLink.classList.remove('hidden');
+            cartNavLink.style.display = 'block';
+        }
+        if (mobileCartLink) {
+            mobileCartLink.classList.remove('hidden');
+            mobileCartLink.style.display = 'block';
         }
     } else {
         console.log('ℹ️ Sem usuário, mostrando botões de auth');
@@ -771,12 +759,7 @@ function addToCart(productId) {
         return;
     }
     
-    // Only clientes can add to cart
-    if (currentUser.tipo !== 'cliente') {
-        alert('Apenas clientes podem adicionar produtos ao carrinho');
-        return;
-    }
-    
+    // All logged-in users can add to cart (vendors can also buy)
     const product = products.find(p => p.id === productId);
     if (!product) return;
 
@@ -927,6 +910,94 @@ function goToRegister() {
     showPage('registro');
 }
 
+// ==================== BECOME VENDOR MODAL ====================
+function showBecomeVendorModal() {
+    const modal = document.getElementById('becomeVendorModal');
+    if (modal) {
+        modal.style.display = 'flex';
+    }
+}
+
+function closeBecomeVendorModal() {
+    const modal = document.getElementById('becomeVendorModal');
+    if (modal) {
+        modal.style.display = 'none';
+    }
+}
+
+function goToVendorRegistration() {
+    closeBecomeVendorModal();
+    showPage('vendor-registration');
+}
+
+function cancelVendorRegistration() {
+    if (currentUser && currentUser.tipo === 'cliente') {
+        showPage('dashboard-cliente');
+    } else {
+        showPage('marketplace');
+    }
+}
+
+// ==================== VENDOR CONVERSION ====================
+async function upgradeToVendor(event) {
+    event.preventDefault();
+    
+    if (!currentUser || currentUser.tipo !== 'cliente') {
+        alert('Apenas clientes podem se tornar vendedores');
+        return;
+    }
+    
+    const nomeLoja = document.getElementById('vendor-nome-loja').value.trim();
+    const categoria = document.getElementById('vendor-categoria').value;
+    const descricao = document.getElementById('vendor-descricao').value.trim();
+    const cpfCnpj = document.getElementById('vendor-cpf-cnpj').value.trim();
+    
+    if (!nomeLoja || !categoria || !cpfCnpj) {
+        showMessage('vendor-registration-messages', 'Por favor, preencha todos os campos obrigatórios', true);
+        return;
+    }
+    
+    if (!validateCpfCnpj(cpfCnpj)) {
+        document.getElementById('vendor-cpf-cnpj-error').style.display = 'block';
+        showMessage('vendor-registration-messages', 'CPF/CNPJ inválido', true);
+        return;
+    }
+    
+    try {
+        // Call API to upgrade user to vendedor
+        const data = await apiRequest('/users/upgrade-to-vendor', {
+            method: 'POST',
+            body: JSON.stringify({
+                nome_loja: nomeLoja,
+                categoria: categoria,
+                descricao_loja: descricao,
+                cpf_cnpj: cpfCnpj
+            })
+        });
+        
+        if (data.success) {
+            // Update current user data
+            currentUser = data.user;
+            localStorage.setItem('currentUser', JSON.stringify(currentUser));
+            
+            showMessage('vendor-registration-messages', 'Parabéns! Você agora é um vendedor!', false);
+            
+            // Navigate to vendor dashboard after a brief delay
+            setTimeout(() => {
+                updateNavbar();
+                showPage('dashboard-vendedor');
+                loadSellerProducts();
+                populateSellerDashboard();
+            }, 2000);
+        } else {
+            throw new Error(data.error || 'Erro ao se tornar vendedor');
+        }
+    } catch (error) {
+        console.error('Erro ao se tornar vendedor:', error);
+        showMessage('vendor-registration-messages', error.message, true);
+    }
+}
+
 // ==================== INICIALIZAÇÃO ====================
 document.addEventListener('DOMContentLoaded', () => {
     console.log('🚀 Inicializando aplicação...');
@@ -935,6 +1006,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const registrationForm = document.getElementById('registrationForm');
     const loginForm = document.getElementById('loginForm');
     const addProductForm = document.getElementById('addProductForm');
+    const vendorRegistrationForm = document.getElementById('vendorRegistrationForm');
     
     if (registrationForm) {
         registrationForm.addEventListener('submit', register);
@@ -955,6 +1027,13 @@ document.addEventListener('DOMContentLoaded', () => {
         console.log('✅ Add product form event listener attached');
     } else {
         console.log('ℹ️ Add product form not found (will be attached when page loads)');
+    }
+    
+    if (vendorRegistrationForm) {
+        vendorRegistrationForm.addEventListener('submit', upgradeToVendor);
+        console.log('✅ Vendor registration form event listener attached');
+    } else {
+        console.log('ℹ️ Vendor registration form not found (will be attached when page loads)');
     }
     
     const savedToken = localStorage.getItem('authToken');
