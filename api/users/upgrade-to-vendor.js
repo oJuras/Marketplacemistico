@@ -97,8 +97,7 @@ export default async function handler(req, res) {
       [user.id]
     );
 
-    const userData = updatedUsers[0];
-    delete userData.senha_hash;
+    const { senha_hash, ...userData } = updatedUsers[0];
 
     return res.status(200).json({
       success: true,

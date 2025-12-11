@@ -961,6 +961,8 @@ async function upgradeToVendor(event) {
         document.getElementById('vendor-cpf-cnpj-error').style.display = 'block';
         showMessage('vendor-registration-messages', 'CPF/CNPJ inválido', true);
         return;
+    } else {
+        document.getElementById('vendor-cpf-cnpj-error').style.display = 'none';
     }
     
     try {
@@ -976,7 +978,7 @@ async function upgradeToVendor(event) {
         });
         
         if (data.success) {
-            // Update current user data
+            // Update current user data (senha_hash already removed by API)
             currentUser = data.user;
             localStorage.setItem('currentUser', JSON.stringify(currentUser));
             
