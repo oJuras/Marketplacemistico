@@ -577,7 +577,7 @@ async function addProduct(event) {
         });
 
         document.getElementById('addProductForm').reset();
-        showPage('products-list');
+        showPage('seller-products');
         await loadSellerProducts();
         alert('Produto adicionado com sucesso!');
 
@@ -822,7 +822,7 @@ function updateCartBadge() {
 }
 
 function showCart() {
-    showPage('cart');
+    showPage('carrinho');
     renderCart();
 }
 
