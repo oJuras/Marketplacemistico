@@ -315,15 +315,31 @@ function validateCpfCnpj(cpfCnpj) {
 }
 
 function validateCpfCnpjField() {
-    const cpfCnpj = document.getElementById('cpf-cnpj').value.trim();
-    const cpfCnpjError = document.getElementById('cpf-cnpj-error');
-    if (cpfCnpj && !validateCpfCnpj(cpfCnpj)) {
+    // Check both registration form and vendor form
+    const cpfCnpjRegistro = document.getElementById('cpf-cnpj-registro');
+    const cpfCnpjVendor = document.getElementById('vendor-cpf-cnpj');
+    
+    let cpfCnpj = '';
+    let cpfCnpjError = null;
+    
+    if (cpfCnpjRegistro && cpfCnpjRegistro.offsetParent !== null) {
+        // Registration form field
+        cpfCnpj = cpfCnpjRegistro.value.trim();
+        cpfCnpjError = document.getElementById('cpf-cnpj-registro-error');
+    } else if (cpfCnpjVendor && cpfCnpjVendor.offsetParent !== null) {
+        // Vendor upgrade form field
+        cpfCnpj = cpfCnpjVendor.value.trim();
+        cpfCnpjError = document.getElementById('vendor-cpf-cnpj-error');
+    }
+    
+    if (cpfCnpjError && cpfCnpj && !validateCpfCnpj(cpfCnpj)) {
         cpfCnpjError.style.display = 'block';
         return false;
-    } else {
+    } else if (cpfCnpjError) {
         cpfCnpjError.style.display = 'none';
         return true;
     }
+    return true;
 }
 
 function validateEmail() {
