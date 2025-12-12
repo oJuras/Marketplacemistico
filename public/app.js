@@ -705,6 +705,11 @@ function updateNavbar() {
 function renderProducts() {
     const container = document.getElementById('products-grid');
     
+    if (!container) {
+        console.error('Container products-grid não encontrado');
+        return;
+    }
+    
     if (products.length === 0) {
         container.innerHTML = '<p style="grid-column: 1/-1; text-align: center;">Nenhum produto encontrado</p>';
         return;
@@ -728,6 +733,11 @@ function renderProducts() {
 
 function renderSellerProducts(sellerProducts) {
     const container = document.getElementById('seller-products-content');
+    
+    if (!container) {
+        console.error('Container seller-products-content não encontrado');
+        return;
+    }
     
     if (sellerProducts.length === 0) {
         container.innerHTML = `
