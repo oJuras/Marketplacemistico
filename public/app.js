@@ -727,7 +727,7 @@ function renderProducts() {
 }
 
 function renderSellerProducts(sellerProducts) {
-    const container = document.getElementById('seller-products-list');
+    const container = document.getElementById('seller-products-content');
     
     if (sellerProducts.length === 0) {
         container.innerHTML = `
