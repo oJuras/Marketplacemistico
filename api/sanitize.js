@@ -12,10 +12,9 @@ export function sanitizeString(input) {
   
   return input
     .trim()
-    // Remove HTML tags
-    .replace(/<[^>]*>/g, '')
-    // Remove script tags specifically
-    .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '')
+    // Remove HTML tags using a simple and efficient approach
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
     // Remove javascript: protocol
     .replace(/javascript:/gi, '')
     // Remove on* event handlers

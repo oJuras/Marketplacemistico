@@ -426,10 +426,13 @@ async function register(event) {
         return;
     }
 
-    // Validate CPF/CNPJ
+    // Validate CPF/CNPJ format
     if (!validateCpfCnpj(cpf_cnpj)) {
+        document.getElementById('cpf-cnpj-registro-error').style.display = 'block';
         showMessage('registration-messages', 'CPF/CNPJ inválido', true);
         return;
+    } else {
+        document.getElementById('cpf-cnpj-registro-error').style.display = 'none';
     }
 
     const userData = { tipo, nome, email, senha, telefone, cpf_cnpj };
