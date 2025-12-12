@@ -393,7 +393,7 @@ async function register(event) {
     event.preventDefault();
     clearMessages();
 
-    if (!validateEmail() || !validatePassword() || !validatePasswordMatch() || !validateCpfCnpjField()) {
+    if (!validateEmail() || !validatePassword() || !validatePasswordMatch()) {
         showMessage('registration-messages', 'Por favor, corrija os erros no formulário', true);
         return;
     }
@@ -403,10 +403,16 @@ async function register(event) {
     const email = document.getElementById('email').value.trim();
     const senha = document.getElementById('senha').value;
     const telefone = document.getElementById('telefone').value.trim();
-    const cpf_cnpj = document.getElementById('cpf-cnpj').value.trim();
+    const cpf_cnpj = document.getElementById('cpf-cnpj-registro').value.trim();
 
-    if (!nome || !email || !senha) {
+    if (!nome || !email || !senha || !telefone || !cpf_cnpj) {
         showMessage('registration-messages', 'Por favor, preencha todos os campos obrigatórios', true);
+        return;
+    }
+
+    // Validate CPF/CNPJ
+    if (!validateCpfCnpj(cpf_cnpj)) {
+        showMessage('registration-messages', 'CPF/CNPJ inválido', true);
         return;
     }
 
