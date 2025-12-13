@@ -20,6 +20,14 @@ let products = [];
 let shoppingCart = [];
 let currentFilter = 'Todos';
 
+// ==================== HELPERS ====================
+function getProductImageHTML(product) {
+    if (product.imagem_url) {
+        return `<img src="${product.imagem_url}" alt="${product.nome}">`;
+    }
+    return '<div class="no-image">Sem imagem</div>';
+}
+
 // ==================== API HELPERS ====================
 async function apiRequest(endpoint, options = {}) {
     const headers = {
@@ -313,7 +321,7 @@ function renderStoreProducts(storeProducts) {
     container.innerHTML = storeProducts.map(product => `
         <div class="product-card">
             <div class="product-image">
-                ${product.imagem_url ? `<img src="${product.imagem_url}" alt="${product.nome}">` : '<div class="no-image">Sem imagem</div>'}
+                ${getProductImageHTML(product)}
             </div>
             <div class="product-info">
                 <h3>${product.nome}</h3>
@@ -439,6 +447,7 @@ function formatCpfCnpj(input) {
 
 function formatCep(input) {
     let value = input.value.replace(/\D/g, '');
+    value = value.substring(0, 8); // Limit to 8 digits
     value = value.replace(/(\d{5})(\d)/, '$1-$2');
     input.value = value;
 }
@@ -870,7 +879,7 @@ function renderProducts() {
     container.innerHTML = products.map(product => `
         <div class="product-card">
             <div class="product-image">
-                ${product.imagem_url ? `<img src="${product.imagem_url}" alt="${product.nome}">` : '<div class="no-image">Sem imagem</div>'}
+                ${getProductImageHTML(product)}
             </div>
             <div class="product-info">
                 <h3>${product.nome}</h3>

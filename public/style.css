@@ -724,6 +724,7 @@ body, html {
 .product-image .no-image {
     font-size: 3rem;
     color: var(--color-text-secondary);
+    text-align: center;
 }
 
 .product-category {
