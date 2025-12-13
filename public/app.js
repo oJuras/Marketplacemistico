@@ -1038,14 +1038,16 @@ function renderCart() {
 }
 
 function filterByCategory(categoria) {
+    // Get all filter buttons once
+    const filterButtons = document.querySelectorAll('.filter-btn');
+    
     // Remove active class from all buttons
-    document.querySelectorAll('.filter-btn').forEach(btn => {
+    filterButtons.forEach(btn => {
         btn.classList.remove('active');
     });
     
     // Find and activate the clicked button
-    const buttons = document.querySelectorAll('.filter-btn');
-    buttons.forEach(btn => {
+    filterButtons.forEach(btn => {
         if (btn.textContent.includes(categoria) || (categoria === 'Todos' && btn.textContent === 'Todos')) {
             btn.classList.add('active', 'loading');
             
@@ -1240,8 +1242,13 @@ async function updateSellerProfile(event) {
     }
     
     try {
-        // Call API to update seller profile (to be implemented)
-        // For now, just update localStorage
+        // TODO: Call API to update seller profile when endpoint is available
+        // await apiRequest('/sellers/profile', {
+        //     method: 'PUT',
+        //     body: JSON.stringify({ nome_loja: nomeLoja, descricao_loja: descricaoLoja, categoria, cpf_cnpj: cpfCnpj })
+        // });
+        
+        // For now, just update localStorage (will not persist across sessions until API is implemented)
         currentUser.nome_loja = nomeLoja;
         currentUser.descricao_loja = descricaoLoja;
         currentUser.categoria = categoria;
@@ -1286,8 +1293,13 @@ async function updateClienteProfile(event) {
     }
     
     try {
-        // Call API to update client profile (to be implemented)
-        // For now, just update localStorage
+        // TODO: Call API to update client profile when endpoint is available
+        // await apiRequest('/users/profile', {
+        //     method: 'PUT',
+        //     body: JSON.stringify({ nome, telefone, cep, rua, numero, complemento, bairro, cidade, estado })
+        // });
+        
+        // For now, just update localStorage (will not persist across sessions until API is implemented)
         currentUser.nome = nome;
         currentUser.telefone = telefone;
         currentUser.cep = cep;
