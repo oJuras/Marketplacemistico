@@ -19,12 +19,12 @@ Padronizar o fluxo de desenvolvimento para proteger producao e dar previsibilida
 
 Exemplos:
 - `codex/c02-s26-motor-custo-total`
-- `VictordgDev/c02-s27-segregacao-quote`
+- `VictorDG00/c02-s27-segregacao-quote`
 
 ### Hotfix
 - Padrao obrigatorio: `autor/hotfix-YYYYMMDD-descricao`
 - Exemplo:
-  - `VictordgDev/hotfix-20260318-falha-webhook-efi`
+  - `VictorDG00/hotfix-20260318-falha-webhook-efi`
 
 ## Regras obrigatorias
 1. Nao fazer push direto em `main`.
@@ -86,13 +86,13 @@ Configurar em `Settings > Branches`:
   - `integration-tests`
 - Do not allow bypassing the above settings.
 
-## Vercel
-- `main` = Production Branch.
-- `develop` e branches de sprint/hotfix = Preview.
-- Variaveis separadas por `Production` e `Preview`.
+## Deploy
+- **Backend (Fly.io):** deploy automatico via CI em merge para `main`.
+- **Frontend (Cloudflare Pages):** deploy por push; `main` = Production, `develop` = Preview.
+- Variaveis/secrets separados por ambiente no Fly.io e Cloudflare.
 
 ## Script utilitario
 Para criar branch padronizada, usar:
 ```powershell
-./scripts/new-sprint-branch.ps1 -Type sprint -AuthorNick VictordgDev -CycleNumber 2 -SprintNumber 19 -Description "ajuste-carrinho"
+./scripts/new-sprint-branch.ps1 -Type sprint -AuthorNick VictorDG00 -CycleNumber 2 -SprintNumber 19 -Description "ajuste-carrinho"
 ```
